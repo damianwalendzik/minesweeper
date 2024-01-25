@@ -25,6 +25,9 @@ class Cell:
         if self.is_mine:
             self.show_mine()
         else:
+            if self.surrounded_cells_mines_length == 0:
+                for cell_object in self.surrounded_cells():
+                    cell_object.show_cell()
             self.show_cell()
 
     def get_cell_by_axis(self, x, y):
