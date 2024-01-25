@@ -1,6 +1,9 @@
 from tkinter import Button, Label
 from random import sample
 import settings
+import ctypes
+import sys
+
 class Cell:
     all = []
     cell_count_label_object = None
@@ -11,6 +14,7 @@ class Cell:
         self.x=x
         self.y=y
         self.is_opened = False
+        self.is_mine_candidate = False
         #Append the obj to the Cell.all list
         Cell.all.append(self)
 
@@ -32,6 +36,9 @@ class Cell:
                 for cell_object in self.surrounded_cells():
                     cell_object.show_cell()
             self.show_cell()
+        self.cell_btn_object.config(state='disabled')
+        self.cell_btn_object.unbind('<Button-3>')
+
 
     def get_cell_by_axis(self, x, y):
         #Return a cell obj based on the value of x,y
@@ -41,6 +48,10 @@ class Cell:
             
     def show_mine(cell):
         cell.cell_btn_object.configure(bg='red')
+        ctypes.windll.user32.MessageBoxW(
+            0, 'You clicked on a mine!', 'Game Over', 0
+            )
+        sys.exit()
     
     def surrounded_cells(self):
         cells = [
@@ -66,8 +77,16 @@ class Cell:
         return counter
 
     def right_click_actions(self, event):
-        print(event)
-        print("I am right clicked")
+        if not self.is_mine_candidate:
+            self.cell_btn_object.configure(
+                bg='orange'
+            )
+            self.is_mine_candidate = True
+        else:
+            self.cell_btn_object.configure(
+                bg='SystemButtonFace'
+            )
+            self.is_mine_candidate = False
 
     @staticmethod
     def randomize_mines():
@@ -86,7 +105,11 @@ class Cell:
                 Cell.cell_count_label_object.configure(
                     text=f'Cells left:{Cell.cell_count}'
                     )
-                self.is_opened = True
+            self.cell_btn_object.configure(
+                bg='SystemButtonFace'
+            )
+        
+        self.is_opened = True
 
     @staticmethod
     def create_cell_count_label(location):
